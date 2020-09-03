@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import styled, { css } from 'styled-components';
+import { animated } from 'react-spring';
 
 interface ContainerProps {
   type?: 'success' | 'error' | 'info';
   hasDescription: boolean;
+  style: object;
 }
 
 const toastTypeVariations = {
@@ -20,7 +23,7 @@ const toastTypeVariations = {
   `,
 };
 
-export const Container = styled.div<ContainerProps>`
+export const Container = styled(animated.div)<ContainerProps>`
   display: flex;
   width: 360px;
   position: relative;

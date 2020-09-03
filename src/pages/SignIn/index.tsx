@@ -12,7 +12,7 @@ import { Container, Content, Background } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import getValidationErrors from '../../utils/getValidationErros';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/AuthContext';
 
 interface SignInFormData {
   email: string;
@@ -22,7 +22,7 @@ interface SignInFormData {
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  const { user, signIn } = useAuth();
+  const { signIn } = useAuth();
 
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {
@@ -42,8 +42,6 @@ const SignIn: React.FC = () => {
 
         signIn({ email: data.email, password: data.password });
       } catch (err) {
-        console.log(err);
-
         const errors = getValidationErrors(err);
 
         formRef.current?.setErrors(errors);

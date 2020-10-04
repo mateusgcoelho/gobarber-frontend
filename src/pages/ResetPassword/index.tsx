@@ -1,13 +1,14 @@
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/ban-types */
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import { FiLock } from 'react-icons/fi';
 
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { FormHandles } from '@unform/core';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.svg';
+import api from '../../services/api';
 
 import { Container, Content, AnimationContainer, Background } from './styles';
 
@@ -22,15 +23,23 @@ interface ResetPasswordFormData {
 }
 
 const ResetPassword: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const formRef = useRef<FormHandles>(null);
 
   const { addToast } = useToast();
 
   const history = useHistory();
+  const location = useLocation();
+  const token = location.search.replace('?token=', '');
+
+  if (!token) {
+    history.push('/');
+  }
 
   const handleSubmit = useCallback(
     async (data: ResetPasswordFormData) => {
       try {
+        setLoading(true);
         formRef.current?.setErrors({});
 
         const schema = Yup.object().shape({
@@ -45,11 +54,23 @@ const ResetPassword: React.FC = () => {
           abortEarly: false,
         });
 
-        history.push('/signin');
+        const { password, password_confirmation } = data;
+
+        if (!token) {
+          throw new Error();
+        }
+
+        await api.post('/password/reset', {
+          password,
+          password_confirmation,
+          token,
+        });
+
+        history.push('/');
 
         addToast({
           type: 'success',
-          title: 'Autenticado com sucesso!',
+          title: 'Senha alterada com sucesso!',
         });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -65,9 +86,11 @@ const ResetPassword: React.FC = () => {
           title: 'Erro ao resetar senha',
           description: 'Ocorreu um erro ao resetar sua senha, tente novamente.',
         });
+      } finally {
+        setLoading(false);
       }
     },
-    [addToast, history],
+    [addToast, history, token],
   );
 
   return (
@@ -93,7 +116,9 @@ const ResetPassword: React.FC = () => {
               placeholder="Confirmação da senha"
             />
 
-            <Button type="submit">Alterar senha</Button>
+            <Button loading={loading} type="submit">
+              Alterar senha
+            </Button>
           </Form>
         </AnimationContainer>
       </Content>

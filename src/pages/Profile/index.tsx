@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, ChangeEvent } from 'react';
 import { FiUser, FiLock, FiMail, FiCamera, FiArrowLeft } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
@@ -32,7 +32,27 @@ const Profile: React.FC = () => {
 
   const history = useHistory();
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+
+  const handleAvatarChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const data = new FormData();
+
+        data.append('avatar', e.target.files[0]);
+
+        api.patch('/users/avatar', data).then(response => {
+          updateUser(response.data);
+
+          addToast({
+            type: 'success',
+            title: 'Avatar atualizado!',
+          });
+        });
+      }
+    },
+    [addToast],
+  );
 
   const handleSubmit = useCallback(
     async (data: ProfileFormData) => {
@@ -104,17 +124,19 @@ const Profile: React.FC = () => {
             <AvatarInput>
               <img src={user.avatar_url} alt={user.name} />
 
-              <button type="button">
+              <label htmlFor="avatar">
                 <FiCamera />
-              </button>
+                <input type="file" id="avatar" onChange={handleAvatarChange} />
+              </label>
             </AvatarInput>
           ) : (
             <AvatarInput>
               <img src={noneUser} alt={user.name} />
 
-              <button type="button">
+              <label htmlFor="avatar">
                 <FiCamera />
-              </button>
+                <input type="file" id="avatar" onChange={handleAvatarChange} />
+              </label>
             </AvatarInput>
           )}
 

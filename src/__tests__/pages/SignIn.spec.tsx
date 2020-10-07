@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import SignIn from '../../pages/SignIn';
 
@@ -14,19 +14,29 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('../../hooks/auth.tsx', () => {
+  return {
+    useAuth: () => ({
+      signIn: jest.fn(),
+    }),
+  };
+});
+
 describe('SignIn Page', () => {
-  it('should be able to sign in', () => {
+  it('should not be able to sign in with invalid credentials', async () => {
     const { getByPlaceholderText, getByText } = render(<SignIn />);
 
     const emailField = getByPlaceholderText('E-mail');
     const passwordField = getByPlaceholderText('Senha');
     const buttonElement = getByText('Entrar');
 
-    fireEvent.change(emailField, { target: { value: 'johndoe@example.com' } });
+    fireEvent.change(emailField, { target: { value: 'not-valid-email' } });
     fireEvent.change(passwordField, { target: { value: '123456' } });
 
     fireEvent.click(buttonElement);
 
-    expect(mockedHistoryPush).toHaveBeenCalledWith('/dashboard');
+    waitFor(() => {
+      expect(mockedHistoryPush).not.toHaveBeenCalledWith('/dashboard');
+    });
   });
 });

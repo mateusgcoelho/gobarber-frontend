@@ -138,7 +138,7 @@ const Profile: React.FC = () => {
         setLoading(false);
       }
     },
-    [addToast, history],
+    [addToast, history, updateUser],
   );
 
   return (

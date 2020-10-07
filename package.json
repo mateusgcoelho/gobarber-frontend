@@ -32,7 +32,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:coverage": "yarn test --coverage --watchAll false",
+    "test:coverage": "yarn test --coverage --unhandled-rejections=strict --watchAll false",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
